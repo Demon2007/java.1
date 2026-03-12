@@ -1,41 +1,103 @@
 {% extends "learning/base.html" %}
 {% load static %}
 
-{% block title %}Модули - Java Learning{% endblock %}
+{% block title %}Тесты - Java Learning{% endblock %}
 
 {% block head %}
 <link rel="stylesheet" href="{% static 'learning/css/modules.css' %}" />
 {% endblock %}
 
 {% block content %}
-<div class="page-head">
-  <h1 class="page-title">Модули</h1>
-  <p class="page-subtitle">Выбирай модуль и проходи уроки по порядку.</p>
-</div>
+<section class="modules-hero reveal reveal-left">
+  <div class="modules-hero__content">
+    <div class="modules-hero__badge">Java Tests</div>
+    <h1 class="modules-hero__title">Тесты</h1>
+    <p class="modules-hero__subtitle">
+      Выбирай тест, проходи задания по темам и отслеживай свой прогресс.
+    </p>
+  </div>
 
-<div class="modules-grid">
-  {% for module in modules %}
-    <a class="module-card card glow-border" href="{% url 'module_detail' module.id %}">
-      <div class="module-top">
+  <div class="modules-hero__stats reveal reveal-right reveal-delay-1">
+    <div class="modules-stat tilt spotlight">
+      <div class="modules-stat__num">{{ modules|length }}</div>
+      <div class="modules-stat__label">всего тестов</div>
+    </div>
+
+    <div class="modules-stat tilt spotlight">
+      <div class="modules-stat__num">Java</div>
+      <div class="modules-stat__label">проверка знаний</div>
+    </div>
+
+    <div class="modules-stat tilt spotlight">
+      <div class="modules-stat__num">Step</div>
+      <div class="modules-stat__label">пошаговый путь</div>
+    </div>
+  </div>
+</section>
+
+<section class="modules-section">
+  <div class="section-head reveal reveal-up">
+    <div>
+      <h2 class="section-title">Список тестов</h2>
+      <p class="section-subtitle">Каждый тест — это отдельный этап проверки знаний.</p>
+    </div>
+  </div>
+
+  <div class="modules-grid">
+    {% for module in modules %}
+      <a class="module-card card glow-border reveal reveal-up tilt spotlight"
+         href="{% url 'test_detail' module.id %}">
+        <div class="module-card__glow"></div>
+
+        <div class="module-top">
+          <div class="module-level">Level {{ module.order }}</div>
+          <div class="module-order">#{{ module.order }}</div>
+        </div>
+
         <div class="module-title">{{ module.title }}</div>
-        <div class="module-order">#{{ module.order }}</div>
+
+        {% if module.description %}
+          <div class="module-desc">{{ module.description }}</div>
+        {% else %}
+          <div class="module-desc muted">Описание не добавлено</div>
+        {% endif %}
+
+        <div class="module-progress">
+          <div class="module-progress__row">
+            <span>Прогресс теста</span>
+            <span class="module-progress__value">{{ module.progress_percent }}%</span>
+          </div>
+          <div class="module-progress__bar">
+            <div class="module-progress__fill" style="width: {{ module.progress_percent }}%;"></div>
+          </div>
+        </div>
+
+        <div class="module-meta">
+          <span class="chip">
+            <i data-lucide="book-open"></i>
+            Уроков: {{ module.lessons_count }}
+          </span>
+
+          <span class="chip chip-progress">
+            <i data-lucide="activity"></i>
+            Прогресс: {{ module.progress_percent }}%
+          </span>
+        </div>
+
+        <div class="module-footer">
+          <span class="module-link-text">Открыть тест</span>
+          <span class="module-arrow">→</span>
+        </div>
+      </a>
+    {% empty %}
+      <div class="modules-empty reveal reveal-up">
+        Тестов пока нет. Добавь их в админке.
       </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
 
-      {% if module.description %}
-        <div class="module-desc">{{ module.description }}</div>
-      {% else %}
-        <div class="module-desc muted">Описание не добавлено</div>
-      {% endif %}
-
-      <div class="module-meta">
-        <span class="chip">Уроков: {{ module.lessons.count }}</span>
-        <span class="chip chip-progress" data-module-id="{{ module.id }}">Прогресс: —</span>
-      </div>
-    </a>
-  {% empty %}
-    <p>Модулей пока нет. Добавь модули в админке.</p>
-  {% endfor %}
-</div>
-
+{% block scripts %}
 <script src="{% static 'learning/js/modules.js' %}"></script>
 {% endblock %}

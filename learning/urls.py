@@ -9,8 +9,11 @@ urlpatterns = [
     path("lessons/<int:lesson_id>/", views.lesson_detail, name="lesson_detail"),
     path("lessons/<int:lesson_id>/quiz/", views.quiz, name="quiz"),
 
-    path("modules/", views.module_list, name="module_list"),
-    path("modules/<int:module_id>/", views.module_detail, name="module_detail"),
+    path("tests/", views.module_list, name="tests_list"),
+    path("tests/<int:module_id>/", views.module_detail, name="test_detail"),
+
+    path("profile/", views.profile_view, name="profile"),
+    path("profile/edit/", views.edit_profile, name="edit_profile"),
 
     path("editor/", views.editor, name="editor"),
     path("api/run-java/", views.run_java, name="run_java"),

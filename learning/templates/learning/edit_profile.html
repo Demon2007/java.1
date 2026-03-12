@@ -1,0 +1,69 @@
+{% extends "learning/base.html" %}
+{% load static %}
+
+{% block title %}Редактирование профиля - Java Learning{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'learning/css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="profile-page">
+  <div class="profile-edit-card glow-border reveal">
+    <div class="profile-badge">Profile Settings</div>
+    <h1 class="profile-edit-title">Редактирование профиля</h1>
+    <p class="profile-edit-subtitle">Измени данные аккаунта и загрузи свою аватарку.</p>
+
+    <form method="post" enctype="multipart/form-data" class="profile-form">
+      {% csrf_token %}
+
+      <div class="profile-form-grid">
+        <div class="profile-form-group">
+          <label>Имя</label>
+          {{ user_form.first_name }}
+        </div>
+
+        <div class="profile-form-group">
+          <label>Фамилия</label>
+          {{ user_form.last_name }}
+        </div>
+
+        <div class="profile-form-group profile-form-group--full">
+          <label>Email</label>
+          {{ user_form.email }}
+        </div>
+
+        <div class="profile-form-group profile-form-group--full">
+          <label>Никнейм</label>
+          {{ profile_form.nickname }}
+        </div>
+
+        <div class="profile-form-group profile-form-group--full">
+          <label>Аватар</label>
+          {{ profile_form.avatar }}
+        </div>
+
+        <div class="profile-form-group profile-form-group--full">
+          <label>О себе</label>
+          {{ profile_form.bio }}
+        </div>
+
+        <div class="profile-form-group">
+          <label>Страна</label>
+          {{ profile_form.country }}
+        </div>
+
+        <div class="profile-form-group">
+          <label>Дата рождения</label>
+          {{ profile_form.birth_date }}
+        </div>
+      </div>
+
+      <div class="profile-form-actions">
+        <button type="submit" class="btn-primary">Сохранить</button>
+        <a href="{% url 'profile' %}" class="btn-secondary">Назад</a>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

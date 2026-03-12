@@ -1,171 +1,144 @@
-{% extends "learning/base.html" %} {% load static %} {% block title %}Тест: {{
-lesson.title }} - Java Learning{% endblock %} {% block content %}
-<div class="page-head">
-  <h1 class="page-title">Тест</h1>
-  <p class="page-subtitle">Урок: <b>{{ lesson.title }}</b></p>
-</div>
+{% extends "learning/base.html" %}
+{% load static %}
 
-{% if questions|length == 0 %}
-<div class="card card-pad">
-  <p>
-    Для этого урока пока нет вопросов. Добавь их в админке (Вопросы тестов →
-    Урок).
-  </p>
-</div>
-{% else %} {% if submitted %}
-<div class="card card-pad" style="margin-bottom: 16px">
-  <h3 style="margin-bottom: 8px">Результат</h3>
-  <p><b>{{ correct_count }}</b> из <b>{{ total }}</b> ({{ percent }}%)</p>
+{% block title %}Тест: {{ lesson.title }} - Java Learning{% endblock %}
 
-  <button
-    class="btn btn-primary"
-    type="button"
-    onclick="markTestCompleted('{{ lesson.id }}')"
-    style="margin-top: 10px"
-  >
-    Отметить тест пройденным
-  </button>
-</div>
-{% endif %}
+{% block head %}
+<link rel="stylesheet" href="{% static 'learning/css/quiz.css' %}">
+{% endblock %}
 
-<form method="post" class="quiz">
-  {% csrf_token %} {% for q in questions %}
-  <div class="card card-pad glow-border" style="margin-bottom: 14px">
-    <div style="font-weight: 800; margin-bottom: 10px">
-      {{ forloop.counter }}. {{ q.question }}
-    </div>
+{% block content %}
+<section class="quiz-page">
 
-    <label class="quiz-opt">
-      <input
-        type="radio"
-        name="q_{{ q.id }}"
-        value="A"
-        {%
-        if
-        submitted
-        and
-        q.picked=""
-        ="A"
-        %}checked{%
-        endif
-        %}
-      />
-      <span>A) {{ q.option_a }}</span>
-    </label>
+  <div class="quiz-hero glow-border reveal">
+    <div class="quiz-hero__content">
+      <div class="quiz-badge">Java Test</div>
+      <h1 class="quiz-title">Тест</h1>
+      <p class="quiz-subtitle">
+        Урок: <strong>{{ lesson.title }}</strong>
+      </p>
 
-    <label class="quiz-opt">
-      <input
-        type="radio"
-        name="q_{{ q.id }}"
-        value="B"
-        {%
-        if
-        submitted
-        and
-        q.picked=""
-        ="B"
-        %}checked{%
-        endif
-        %}
-      />
-      <span>B) {{ q.option_b }}</span>
-    </label>
-
-    <label class="quiz-opt">
-      <input
-        type="radio"
-        name="q_{{ q.id }}"
-        value="C"
-        {%
-        if
-        submitted
-        and
-        q.picked=""
-        ="C"
-        %}checked{%
-        endif
-        %}
-      />
-      <span>C) {{ q.option_c }}</span>
-    </label>
-
-    <label class="quiz-opt">
-      <input
-        type="radio"
-        name="q_{{ q.id }}"
-        value="D"
-        {%
-        if
-        submitted
-        and
-        q.picked=""
-        ="D"
-        %}checked{%
-        endif
-        %}
-      />
-      <span>D) {{ q.option_d }}</span>
-    </label>
-
-    {% if submitted %}
-    <div
-      style="
-        margin-top: 12px;
-        padding-top: 12px;
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
-      "
-    >
-      {% if q.picked == q.correct %}
-      <div style="font-weight: 700">✅ Верно</div>
-      {% else %}
-      <div style="font-weight: 700">
-        ❌ Неверно. Правильный вариант: {{ q.correct }}
-      </div>
-      {% endif %} {% if q.explanation %}
-      <div class="muted" style="margin-top: 8px">{{ q.explanation }}</div>
+      {% if lesson.description %}
+        <p class="quiz-description">{{ lesson.description }}</p>
       {% endif %}
     </div>
-    {% endif %}
+
+    <div class="quiz-hero__meta">
+      <div class="quiz-stat">
+        <div class="quiz-stat__value">{{ questions|length }}</div>
+        <div class="quiz-stat__label">вопросов</div>
+      </div>
+
+      {% if submitted %}
+        <div class="quiz-stat success">
+          <div class="quiz-stat__value">{{ percent }}%</div>
+          <div class="quiz-stat__label">результат</div>
+        </div>
+      {% endif %}
+    </div>
   </div>
-  {% endfor %}
 
-  <button class="btn btn-primary" type="submit">Проверить</button>
-</form>
+  <form method="post" class="quiz-form">
+    {% csrf_token %}
 
-<style>
-  .quiz-opt {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    padding: 10px 0;
-    cursor: pointer;
-    user-select: none;
-  }
-  .quiz-opt input {
-    margin-top: 2px;
-    transform: scale(1.1);
-  }
-</style>
+    {% for q in questions %}
+      <div class="quiz-card reveal reveal-up">
+        <div class="quiz-card__head">
+          <div class="quiz-number">{{ forloop.counter }}</div>
+          <h2 class="quiz-question">{{ q.question }}</h2>
+        </div>
 
-<script>
-  // если у тебя уже есть markTestCompleted в lessons.js — отлично.
-  // На всякий случай страховка:
-  window.markTestCompleted =
-    window.markTestCompleted ||
-    function (testId) {
-      try {
-        const raw = localStorage.getItem("completedTests");
-        const arr = raw ? JSON.parse(raw) : [];
-        const s = arr.map(String);
-        if (!s.includes(String(testId))) {
-          arr.push(String(testId));
-          localStorage.setItem("completedTests", JSON.stringify(arr));
-        }
-        alert("Тест отмечен как пройден ✅");
-      } catch (e) {
-        console.log(e);
-      }
-    };
-</script>
+        <div class="quiz-options">
+          <label class="quiz-option {% if submitted and q.picked == 'A' %}selected{% endif %} {% if submitted and q.correct == 'A' %}correct{% elif submitted and q.picked == 'A' and q.correct != 'A' %}wrong{% endif %}">
+            <input type="radio" name="q_{{ q.id }}" value="A" {% if q.picked == 'A' %}checked{% endif %} {% if submitted %}disabled{% endif %}>
+            <span class="quiz-option__letter">A</span>
+            <span class="quiz-option__text">{{ q.option_a }}</span>
+          </label>
 
-{% endif %} {% endblock %}
+          <label class="quiz-option {% if submitted and q.picked == 'B' %}selected{% endif %} {% if submitted and q.correct == 'B' %}correct{% elif submitted and q.picked == 'B' and q.correct != 'B' %}wrong{% endif %}">
+            <input type="radio" name="q_{{ q.id }}" value="B" {% if q.picked == 'B' %}checked{% endif %} {% if submitted %}disabled{% endif %}>
+            <span class="quiz-option__letter">B</span>
+            <span class="quiz-option__text">{{ q.option_b }}</span>
+          </label>
+
+          <label class="quiz-option {% if submitted and q.picked == 'C' %}selected{% endif %} {% if submitted and q.correct == 'C' %}correct{% elif submitted and q.picked == 'C' and q.correct != 'C' %}wrong{% endif %}">
+            <input type="radio" name="q_{{ q.id }}" value="C" {% if q.picked == 'C' %}checked{% endif %} {% if submitted %}disabled{% endif %}>
+            <span class="quiz-option__letter">C</span>
+            <span class="quiz-option__text">{{ q.option_c }}</span>
+          </label>
+
+          <label class="quiz-option {% if submitted and q.picked == 'D' %}selected{% endif %} {% if submitted and q.correct == 'D' %}correct{% elif submitted and q.picked == 'D' and q.correct != 'D' %}wrong{% endif %}">
+            <input type="radio" name="q_{{ q.id }}" value="D" {% if q.picked == 'D' %}checked{% endif %} {% if submitted %}disabled{% endif %}>
+            <span class="quiz-option__letter">D</span>
+            <span class="quiz-option__text">{{ q.option_d }}</span>
+          </label>
+        </div>
+
+        {% if submitted %}
+          <div class="quiz-result-line">
+            {% if q.picked == q.correct %}
+              <span class="quiz-result good">Верно</span>
+            {% else %}
+              <span class="quiz-result bad">Неверно</span>
+              <span class="quiz-correct-answer">Правильный ответ: {{ q.correct }}</span>
+            {% endif %}
+          </div>
+
+          {% if q.explanation %}
+            <div class="quiz-explanation">
+              <strong>Пояснение:</strong> {{ q.explanation }}
+            </div>
+          {% endif %}
+        {% endif %}
+      </div>
+    {% empty %}
+      <div class="quiz-empty glow-border">
+        Для этого урока пока нет вопросов. Добавь их в админке.
+      </div>
+    {% endfor %}
+
+    {% if questions %}
+      <div class="quiz-actions">
+        {% if not submitted %}
+          <button type="submit" class="btn-primary">Проверить</button>
+        {% else %}
+          <a href="{% url 'quiz' lesson.id %}" class="btn-primary">Пройти заново</a>
+        {% endif %}
+
+        {% if lesson.module %}
+          <a href="{% url 'test_detail' lesson.module.id %}" class="btn-secondary">
+            Назад к тестам
+          </a>
+        {% else %}
+          <a href="{% url 'tests_list' %}" class="btn-secondary">
+            К модулям
+          </a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </form>
+
+  {% if submitted %}
+    <div class="quiz-summary glow-border reveal">
+      <h3>Результат</h3>
+      <p>
+        Правильных ответов: <strong>{{ correct_count }}</strong> из <strong>{{ total }}</strong>
+      </p>
+      <div class="quiz-summary__percent">{{ percent }}%</div>
+    </div>
+
+    <div class="quiz-next-actions">
+      {% if next_lesson %}
+        <a href="{% url 'quiz' next_lesson.id %}" class="btn-primary">
+          Следующий тест →
+        </a>
+      {% else %}
+        <a href="{% url 'tests_list' %}" class="btn-primary">
+          Модуль завершён
+        </a>
+      {% endif %}
+    </div>
+  {% endif %}
+
+</section>
+{% endblock %}

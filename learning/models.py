@@ -4,6 +4,22 @@ from django.conf import settings
 from django.utils import timezone
 
 
+
+class Profile(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="profile"
+    )
+    nickname = models.CharField("Никнейм", max_length=100, blank=True)
+    avatar = models.ImageField("Аватар", upload_to="avatars/", blank=True, null=True)
+    bio = models.TextField("О себе", blank=True)
+    country = models.CharField("Страна", max_length=100, blank=True)
+    birth_date = models.DateField("Дата рождения", blank=True, null=True)
+
+    def __str__(self):
+        return f"Profile of {self.user.username}"
+
 class Module(models.Model):
     title = models.CharField("Модуль", max_length=200)
     slug = models.SlugField("Slug", unique=True, blank=True)

@@ -1,11 +1,11 @@
 from django.contrib import admin
-from .models import Module, Lesson, CodeExample, QuizQuestion
+from .models import Module, Lesson, CodeExample, QuizQuestion, Profile
 
 
 @admin.register(Module)
 class ModuleAdmin(admin.ModelAdmin):
     list_display = ("order", "title")
-    list_display_links = ("title",)   # ✅ важно
+    list_display_links = ("title",)
     list_editable = ("order",)
     search_fields = ("title",)
 
@@ -13,7 +13,7 @@ class ModuleAdmin(admin.ModelAdmin):
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
     list_display = ("order", "title", "module", "level", "created_at")
-    list_display_links = ("title",)   # ✅ важно
+    list_display_links = ("title",)
     list_editable = ("order", "module", "level")
     list_filter = ("module", "level")
     search_fields = ("title", "description")
@@ -30,3 +30,9 @@ class QuizQuestionAdmin(admin.ModelAdmin):
     list_display = ("id", "lesson", "question", "correct")
     list_filter = ("lesson", "correct")
     search_fields = ("question",)
+
+
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ("user", "nickname", "country")
+    search_fields = ("user__username", "nickname")

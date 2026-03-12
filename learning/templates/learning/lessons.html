@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="page-head">
+<div class="page-head reveal reveal-left">
   <h1 class="page-title">Уроки</h1>
   <p class="page-subtitle">
     Выбирай уроки и проходи последовательно — прогресс сохранится.
@@ -16,7 +16,7 @@
 </div>
 
 <div class="lessons-layout">
-  <aside class="sidebar">
+  <aside class="sidebar reveal reveal-left reveal-delay-1">
     <div class="panel">
       <div class="progress-wrap" id="progress">
         <div class="progress-row">
@@ -36,10 +36,10 @@
       </div>
 
       <div class="filters">
-        <button class="filter-btn active" data-filter-level="all">Все</button>
-        <button class="filter-btn" data-filter-level="beginner">Начинающий</button>
-        <button class="filter-btn" data-filter-level="middle">Средний</button>
-        <button class="filter-btn" data-filter-level="advanced">Продвинутый</button>
+        <button class="filter-btn active" data-filter-level="all" type="button">Все</button>
+        <button class="filter-btn" data-filter-level="beginner" type="button">Начинающий</button>
+        <button class="filter-btn" data-filter-level="middle" type="button">Средний</button>
+        <button class="filter-btn" data-filter-level="advanced" type="button">Продвинутый</button>
       </div>
 
       <div class="lesson-tools">
@@ -79,16 +79,16 @@
   </aside>
 
   <section class="content">
-    <div class="lessons-list">
+    <div class="lessons-list" id="lessonsList">
       {% for lesson in lessons %}
       <div
-        class="lesson-card reveal {% if lesson.id in completed_ids %}completed{% endif %}"
+        class="lesson-card reveal reveal-up tilt spotlight {% if lesson.id in completed_ids %}completed{% endif %}"
         data-lesson-id="{{ lesson.id }}"
         data-level="{{ lesson.level|default:'beginner' }}"
-        data-title="{{ lesson.title|escape }}"
-        data-desc="{{ lesson.description|default:''|escape }}"
+        data-title="{{ lesson.title|lower|escape }}"
+        data-desc="{{ lesson.description|default:''|lower|escape }}"
         data-order="{{ lesson.order }}"
-        data-created="{{ lesson.created_at|date:'c' }}"
+        data-created="{{ lesson.created_at|date:'U' }}"
       >
         <div class="lesson-left">
           <div class="lesson-badge">{{ forloop.counter }}</div>
@@ -111,7 +111,7 @@
           <div class="lesson-desc js-desc">{{ lesson.description|default:"" }}</div>
 
           <div class="lesson-footer">
-            <div class="lesson-status" id="status-{{ lesson.id }}">
+            <div class="lesson-status">
               {% if lesson.id in completed_ids %}
                 <span class="status-icon">●</span>
                 <span class="status-text">Пройден</span>
@@ -133,10 +133,8 @@
     </div>
   </section>
 </div>
+{% endblock %}
 
-<script>
-  window.IS_AUTH = {% if user.is_authenticated %}true{% else %}false{% endif %};
-  window.API_PROGRESS_URL = "{% url 'api_progress' %}";
-</script>
-<script src="{% static 'learning/js/lessons.js' %}?v=5"></script>
+{% block scripts %}
+<script src="{% static 'learning/js/lessons.js' %}?v=6"></script>
 {% endblock %}

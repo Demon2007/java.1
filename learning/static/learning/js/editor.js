@@ -5,12 +5,13 @@ function getCookie(name) {
   return "";
 }
 
-function setChip(text, kind) {
+function setChip(text, kind = "") {
   const chip = document.getElementById("statusChip");
   if (!chip) return;
+
   chip.textContent = text;
-  chip.classList.remove("ok", "err", "run");
-  if (kind) chip.classList.add(kind);
+  chip.classList.remove("ok", "err", "run", "idle");
+  chip.classList.add(kind || "idle");
 }
 
 function setOutput(text) {
@@ -24,8 +25,33 @@ function setOutput(text) {
   wrap.classList.add("output-pop");
 }
 
+function setRunLoading(isLoading) {
+  const runBtn = document.getElementById("runBtn");
+  if (!runBtn) return;
+
+  runBtn.disabled = isLoading;
+  runBtn.classList.toggle("is-loading", isLoading);
+}
+
+function safeSetLocalStorage(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch (_) {}
+}
+
+function safeGetLocalStorage(key, fallback = "") {
+  try {
+    const value = localStorage.getItem(key);
+    return value ?? fallback;
+  } catch (_) {
+    return fallback;
+  }
+}
+
 require.config({
-  paths: { vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs" },
+  paths: {
+    vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs",
+  },
 });
 
 require(["vs/editor/editor.main"], function () {
@@ -35,6 +61,9 @@ require(["vs/editor/editor.main"], function () {
   const clearOutBtn = document.getElementById("clearOutBtn");
   const sampleBtn = document.getElementById("sampleBtn");
   const stdinEl = document.getElementById("stdin");
+  const editorRoot = document.getElementById("editor");
+
+  if (!editorRoot) return;
 
   const STORAGE = {
     tab: "monaco_tab",
@@ -58,59 +87,78 @@ class Helper {
     }
 }`;
 
-  let activeTab = localStorage.getItem(STORAGE.tab) || "main";
+  let activeTab = safeGetLocalStorage(STORAGE.tab, "main");
 
   const files = {
-    main: localStorage.getItem(STORAGE.main) || defaultMain,
-    helper: localStorage.getItem(STORAGE.helper) || defaultHelper,
+    main: safeGetLocalStorage(STORAGE.main, defaultMain),
+    helper: safeGetLocalStorage(STORAGE.helper, defaultHelper),
   };
 
-  if (stdinEl) stdinEl.value = localStorage.getItem(STORAGE.stdin) || "";
+  if (stdinEl) {
+    stdinEl.value = safeGetLocalStorage(STORAGE.stdin, "");
+    stdinEl.addEventListener("input", () => {
+      safeSetLocalStorage(STORAGE.stdin, stdinEl.value || "");
+    });
+  }
 
-  const editor = monaco.editor.create(document.getElementById("editor"), {
-    value: files[activeTab],
+  const editor = monaco.editor.create(editorRoot, {
+    value: files[activeTab] || defaultMain,
     language: "java",
     theme: "vs-dark",
-    fontSize: 14,
+    fontSize: 15,
     automaticLayout: true,
     minimap: { enabled: false },
     scrollBeyondLastLine: false,
+    smoothScrolling: true,
+    cursorBlinking: "smooth",
+    roundedSelection: true,
+    padding: {
+      top: 16,
+      bottom: 16,
+    },
   });
 
   function setActiveTab(tab) {
     activeTab = tab;
-    localStorage.setItem(STORAGE.tab, tab);
+    safeSetLocalStorage(STORAGE.tab, tab);
 
-    document.querySelectorAll(".tab").forEach((b) => b.classList.remove("active"));
+    document.querySelectorAll(".tab").forEach((b) => {
+      b.classList.remove("active");
+    });
+
     document.querySelector(`.tab[data-tab="${tab}"]`)?.classList.add("active");
-
-    editor.setValue(files[tab]);
-    setChip("Готов", "");
+    editor.setValue(files[tab] ?? "");
+    setChip("Готов", "idle");
   }
 
   editor.onDidChangeModelContent(() => {
     files[activeTab] = editor.getValue();
-    localStorage.setItem(
-      activeTab === "main" ? STORAGE.main : STORAGE.helper,
-      files[activeTab]
-    );
-  });
 
-  stdinEl?.addEventListener("input", () => {
-    localStorage.setItem(STORAGE.stdin, stdinEl.value || "");
+    if (activeTab === "main") {
+      safeSetLocalStorage(STORAGE.main, files.main);
+    } else {
+      safeSetLocalStorage(STORAGE.helper, files.helper);
+    }
   });
 
   document.querySelectorAll(".tab").forEach((btn) => {
-    btn.addEventListener("click", () => setActiveTab(btn.dataset.tab));
+    btn.addEventListener("click", () => {
+      setActiveTab(btn.dataset.tab);
+    });
   });
 
   setActiveTab(activeTab);
 
-  clearOutBtn?.addEventListener("click", () => setOutput(""));
+  clearOutBtn?.addEventListener("click", () => {
+    setOutput("");
+    setChip("Вывод очищен", "idle");
+  });
 
   sampleBtn?.addEventListener("click", () => {
-    if (stdinEl) stdinEl.value = "5\n10 20 30 40 50\n";
-    localStorage.setItem(STORAGE.stdin, stdinEl?.value || "");
+    if (stdinEl) {
+      stdinEl.value = "5\n10 20 30 40 50\n";
+      safeSetLocalStorage(STORAGE.stdin, stdinEl.value || "");
+    }
 
     const sample = `import java.util.*;
 
@@ -119,50 +167,67 @@ public class Main {
         Scanner sc = new Scanner(System.in);
         int n = sc.nextInt();
         int sum = 0;
+
         for (int i = 0; i < n; i++) {
             sum += sc.nextInt();
         }
-        System.out.println("Sum=" + sum);
+
+        System.out.println("Sum = " + sum);
     }
 }`;
 
     files.main = sample;
-    localStorage.setItem(STORAGE.main, sample);
+    safeSetLocalStorage(STORAGE.main, sample);
     setActiveTab("main");
-    setOutput("Вставил пример. Нажми ▶ Запустить.");
+    setOutput("✅ Вставил пример с вводом.\nНажми «Запустить».");
+    setChip("Пример загружен", "idle");
   });
 
   copyBtn?.addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(editor.getValue());
+      const oldText = copyBtn.textContent;
       copyBtn.textContent = "✅ Скопировано";
-      setTimeout(() => (copyBtn.textContent = "Скопировать"), 1100);
-    } catch {
+      setChip("Код скопирован", "ok");
+
+      setTimeout(() => {
+        copyBtn.textContent = oldText || "Скопировать";
+      }, 1100);
+    } catch (_) {
+      setChip("Ошибка копирования", "err");
       alert("Не получилось скопировать. Попробуй Ctrl+C.");
     }
   });
 
   clearBtn?.addEventListener("click", () => {
-    if (!confirm("Очистить весь код (Main.java и Helper.java) и stdin?")) return;
+    const confirmed = confirm("Очистить Main.java, Helper.java, stdin и вывод?");
+    if (!confirmed) return;
 
     files.main = "";
     files.helper = "";
-    localStorage.setItem(STORAGE.main, "");
-    localStorage.setItem(STORAGE.helper, "");
-    if (stdinEl) stdinEl.value = "";
-    localStorage.setItem(STORAGE.stdin, "");
+
+    safeSetLocalStorage(STORAGE.main, "");
+    safeSetLocalStorage(STORAGE.helper, "");
+
+    if (stdinEl) {
+      stdinEl.value = "";
+      safeSetLocalStorage(STORAGE.stdin, "");
+    }
 
     setActiveTab("main");
     setOutput("");
-    setChip("Очищено", "");
+    setChip("Очищено", "idle");
   });
 
   async function run() {
-    const mainCode = localStorage.getItem(STORAGE.main) || editor.getValue();
+    const mainCode =
+      activeTab === "main"
+        ? editor.getValue()
+        : safeGetLocalStorage(STORAGE.main, defaultMain);
+
     const stdin = stdinEl?.value || "";
 
-    runBtn.disabled = true;
-    runBtn.classList.add("is-loading");
+    setRunLoading(true);
     setChip("Выполнение…", "run");
     setOutput("⏳ Выполнение...");
 
@@ -174,7 +239,10 @@ public class Main {
           "X-CSRFToken": getCookie("csrftoken"),
           "X-Requested-With": "XMLHttpRequest",
         },
-        body: JSON.stringify({ code: mainCode, stdin }),
+        body: JSON.stringify({
+          code: mainCode,
+          stdin,
+        }),
       });
 
       const contentType = res.headers.get("content-type") || "";
@@ -182,7 +250,7 @@ public class Main {
       if (!contentType.includes("application/json")) {
         const rawText = await res.text();
         setChip("Ошибка", "err");
-        setOutput("❌ Сервер вернул не JSON.\n\n" + rawText.slice(0, 700));
+        setOutput("❌ Сервер вернул не JSON.\n\n" + rawText.slice(0, 1000));
         return;
       }
 
@@ -200,19 +268,25 @@ public class Main {
       if (data.phase === "compile" && err) {
         setChip("Ошибка компиляции", "err");
         setOutput(`❌ Ошибка компиляции:\n\n${err}`);
+        return;
+      }
+
+      if (err) {
+        setChip("Выполнено с stderr", "err");
       } else {
         setChip("Готово", "ok");
-        const text =
-          (out ? `STDOUT:\n${out}\n\n` : `STDOUT: (пусто)\n\n`) +
-          (err ? `STDERR:\n${err}\n` : `STDERR: (пусто)\n`);
-        setOutput(text);
       }
+
+      const resultText =
+        `${out ? `STDOUT:\n${out}` : "STDOUT: (пусто)"}\n\n` +
+        `${err ? `STDERR:\n${err}` : "STDERR: (пусто)"}`;
+
+      setOutput(resultText);
     } catch (e) {
-      setChip("Ошибка", "err");
-      setOutput("❌ Ошибка запроса: " + e);
+      setChip("Ошибка запроса", "err");
+      setOutput("❌ Ошибка запроса:\n\n" + String(e));
     } finally {
-      runBtn.disabled = false;
-      runBtn.classList.remove("is-loading");
+      setRunLoading(false);
     }
   }
 
@@ -224,8 +298,9 @@ public class Main {
       run();
     }
   });
-});
 
+  setChip("Готов", "idle");
+});
 
 if (window.lucide) {
   lucide.createIcons();

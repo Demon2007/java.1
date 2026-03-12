@@ -95,56 +95,56 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.style.transform = "translate(0,0)";
     });
   });
+})
 
-  /* ===== Particle System ===== */
-  const canvas = document.getElementById("cursorParticles");
-  if(!canvas) return;
+/* ===== Particle System ===== */
+const canvas = document.getElementById("cursorParticles");
+if (!canvas) return;
 
-  const ctx = canvas.getContext("2d");
+const ctx = canvas.getContext("2d");
+let particles = [];
+
+function resizeCanvas() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
+}
 
-  let particles = [];
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
 
-  window.addEventListener("resize", () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  });
+document.addEventListener("mousemove", (e) => {
+  const x = e.clientX;
+  const y = e.clientY;
 
-  document.addEventListener("mousemove", e => {
-    for(let i = 0; i < 2; i++){
-      particles.push({
-        x: e.clientX,
-        y: e.clientY,
-        size: Math.random() * 4 + 1,
-        life: 60,
-        vx: (Math.random() - 0.5) * 2,
-        vy: (Math.random() - 0.5) * 2
-      });
-    }
-  });
-
-  function animate(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    particles.forEach((p, index) => {
-      p.x += p.vx;
-      p.y += p.vy;
-      p.life--;
-
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255,43,74,${p.life/60})`;
-      ctx.fill();
-
-      if(p.life <= 0){
-        particles.splice(index,1);
-      }
+  for (let i = 0; i < 2; i++) {
+    particles.push({
+      x: x,
+      y: y,
+      size: Math.random() * 4 + 1,
+      life: 60,
+      vx: (Math.random() - 0.5) * 2,
+      vy: (Math.random() - 0.5) * 2
     });
-
-    requestAnimationFrame(animate);
   }
-
-  animate();
-
 });
+
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  particles = particles.filter((p) => p.life > 0);
+
+  particles.forEach((p) => {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.life--;
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(168,85,247,${p.life / 60})`;
+    ctx.fill();
+  });
+
+  requestAnimationFrame(animate);
+}
+
+animate();

@@ -9,7 +9,7 @@
 
 {% block content %}
 <div class="lesson-shell">
-  <div class="lesson-header">
+  <div class="lesson-header reveal">
     <div class="lesson-header__top">
       <h1 class="lesson-h1">{{ lesson.title }}</h1>
 
@@ -44,8 +44,7 @@
     {% endif %}
   </div>
 
-  <div
-    class="lesson-content"
+ <div class="lesson-content reveal reveal-delay tilt spotlight"
     id="lessonContent"
     data-raw="{{ lesson.content|escape }}"
   >

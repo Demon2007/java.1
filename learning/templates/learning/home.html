@@ -1,10 +1,15 @@
-{% extends "learning/base.html" %} {% load static %} {% block title %}Главная -
-Java Learning{% endblock %} {% block head %}
-<link rel="stylesheet" href="{% static 'learning/css/home.css' %}" />
-{% endblock %} {% block content %}
+{% extends "learning/base.html" %}
+{% load static %}
 
+{% block title %}Главная - Java Learning{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'learning/css/home.css' %}" />
+{% endblock %}
+
+{% block content %}
 <section class="hero">
-  <div class="hero__content">
+  <div class="hero__content reveal reveal-left">
     <div class="hero__badge">Платформа обучения</div>
     <h1 class="hero__title">Java Learning</h1>
     <p class="hero__subtitle">
@@ -13,9 +18,7 @@ Java Learning{% endblock %} {% block head %}
 
     <div class="hero__actions">
       <a class="btn" href="{% url 'lessons_list' %}">Перейти к урокам</a>
-      <a class="btn outline" href="{% url 'lessons_list' %}#progress"
-        >Мой прогресс</a
-      >
+      <a class="btn outline" href="{% url 'lessons_list' %}#progress">Мой прогресс</a>
     </div>
 
     <div class="hero__stats">
@@ -24,17 +27,26 @@ Java Learning{% endblock %} {% block head %}
         <div class="stat__label">последние уроки</div>
       </div>
       <div class="stat">
-        <div class="stat__num">Java</div>
-        <div class="stat__label">основы + практика</div>
+        <div class="stat__num">{{ completed_count }}/{{ total_lessons }}</div>
+        <div class="stat__label">завершено уроков</div>
       </div>
       <div class="stat">
-        <div class="stat__num">10–20</div>
-        <div class="stat__label">мин на урок</div>
+        <div class="stat__num">{{ progress_percent }}%</div>
+        <div class="stat__label">общий прогресс</div>
       </div>
     </div>
   </div>
 
-  <div class="hero__card">
+  <div class="hero__card reveal reveal-right reveal-delay-1">
+    <div class="java-orb-wrap">
+      <div class="java-orb">
+        <div class="java-orb__ring java-orb__ring--one"></div>
+        <div class="java-orb__ring java-orb__ring--two"></div>
+        <div class="java-orb__ring java-orb__ring--three"></div>
+        <div class="java-orb__core">☕</div>
+      </div>
+    </div>
+
     <div class="heroCard">
       <div class="heroCard__top">
         <div class="heroCard__icon">☕</div>
@@ -49,33 +61,30 @@ Java Learning{% endblock %} {% block head %}
       <div class="heroCard__progress">
         <div class="heroCard__progressRow">
           <span>Прогресс</span>
-          <span class="heroCard__progressValue" id="homeProgressText"
-            >{{ completed_count }} из {{ total_lessons }} уроков ({{ progress_percent }}%)</span>
+          <span class="heroCard__progressValue" id="homeProgressText">
+            {{ completed_count }} из {{ total_lessons }} уроков ({{ progress_percent }}%)
+          </span>
         </div>
         <div class="heroCard__bar">
-          <div
-            class="heroCard__fill"
-            id="homeProgressFill"
-            style="width:
-            {{ progress_percent }}%;"
-          ></div>
+          <div class="heroCard__fill" id="homeProgressFill" style="width: {{ progress_percent }}%;"></div>
         </div>
       </div>
 
       <div class="heroCard__note">
-        {% if user.is_authenticated %} Прогресс сохраняется в аккаунте. {% else
-        %} Войди в аккаунт чтобы сохранять прогресс. {% endif %}
+        {% if user.is_authenticated %}
+          Прогресс сохраняется в аккаунте пользователя и хранится в базе данных PostgreSQL.
+        {% else %}
+          Войди в аккаунт чтобы сохранять прогресс.
+        {% endif %}
       </div>
+
       <div class="heroCard__terminal">
         <div class="terminal__head">
           <span class="dot red"></span>
           <span class="dot yellow"></span>
           <span class="dot green"></span>
         </div>
-        <pre class="terminal__code">
-      <code id="typingCode"></code>
-        </pre>
-
+        <pre class="terminal__code"><code id="typingCode"></code></pre>
         <div class="terminal__output">
           <span class="terminal__label">Output:</span>
           <span id="typingOutput"></span>
@@ -84,26 +93,26 @@ Java Learning{% endblock %} {% block head %}
     </div>
   </div>
 </section>
-<!-- ===== HOW IT WORKS ===== -->
+
 <section class="section how">
   <div class="section__head">
     <h2 class="section__title">Как это работает</h2>
   </div>
 
   <div class="how__grid">
-    <div class="how__card">
+    <div class="how__card reveal reveal-left tilt spotlight">
       <div class="how__num">01</div>
       <h3>Изучи тему</h3>
       <p>Читай структурированные уроки с примерами и объяснениями.</p>
     </div>
 
-    <div class="how__card">
+    <div class="how__card reveal reveal-up reveal-delay-1 tilt spotlight">
       <div class="how__num">02</div>
       <h3>Практика в редакторе</h3>
       <p>Пиши код прямо в браузере и запускай его на сервере.</p>
     </div>
 
-    <div class="how__card">
+    <div class="how__card reveal reveal-right reveal-delay-2 tilt spotlight">
       <div class="how__num">03</div>
       <h3>Отслеживай прогресс</h3>
       <p>Смотри прогресс, проходи уровни и двигайся вперёд.</p>
@@ -111,24 +120,21 @@ Java Learning{% endblock %} {% block head %}
   </div>
 </section>
 
-<!-- ===== FEATURES ===== -->
 <section class="section features">
   <div class="section__head">
     <h2 class="section__title">Почему Java Learning?</h2>
   </div>
 
   <div class="features__grid">
-    <div class="feature">
+    <div class="feature reveal reveal-left tilt spotlight">
       <div class="feature__icon">⚡</div>
       <div>
         <div class="feature__title">Быстрая практика</div>
-        <div class="feature__text">
-          Мгновенный запуск кода без установки IDE.
-        </div>
+        <div class="feature__text">Мгновенный запуск кода без установки IDE.</div>
       </div>
     </div>
 
-    <div class="feature">
+    <div class="feature reveal reveal-up reveal-delay-1 tilt spotlight">
       <div class="feature__icon">📈</div>
       <div>
         <div class="feature__title">Система прогресса</div>
@@ -136,7 +142,7 @@ Java Learning{% endblock %} {% block head %}
       </div>
     </div>
 
-    <div class="feature">
+    <div class="feature reveal reveal-right reveal-delay-2 tilt spotlight">
       <div class="feature__icon">🎯</div>
       <div>
         <div class="feature__title">Чёткая структура</div>
@@ -146,7 +152,6 @@ Java Learning{% endblock %} {% block head %}
   </div>
 </section>
 
-<!-- ===== ROADMAP ===== -->
 <section class="section roadmap">
   <div class="section__head">
     <h2 class="section__title">Путь обучения</h2>
@@ -154,7 +159,7 @@ Java Learning{% endblock %} {% block head %}
   </div>
 
   <div class="roadmap__grid">
-    <div class="road">
+    <div class="road reveal reveal-left tilt spotlight">
       <div class="road__tag">Level 1</div>
       <div class="road__title">Основы синтаксиса</div>
       <div class="road__text">Переменные, типы, операторы, условия, циклы.</div>
@@ -164,7 +169,7 @@ Java Learning{% endblock %} {% block head %}
       </div>
     </div>
 
-    <div class="road">
+    <div class="road reveal reveal-up reveal-delay-1 tilt spotlight">
       <div class="road__tag">Level 2</div>
       <div class="road__title">Методы и структуры</div>
       <div class="road__text">
@@ -176,7 +181,7 @@ Java Learning{% endblock %} {% block head %}
       </div>
     </div>
 
-    <div class="road">
+    <div class="road reveal reveal-right reveal-delay-2 tilt spotlight">
       <div class="road__tag">Level 3</div>
       <div class="road__title">ООП и практика</div>
       <div class="road__text">
@@ -190,7 +195,6 @@ Java Learning{% endblock %} {% block head %}
   </div>
 </section>
 
-<!-- ===== FAQ ===== -->
 <section class="section faq">
   <div class="section__head">
     <h2 class="section__title">FAQ</h2>
@@ -198,37 +202,28 @@ Java Learning{% endblock %} {% block head %}
   </div>
 
   <div class="faq__grid">
-    <details class="faq__item">
+    <details class="faq__item reveal reveal-up">
       <summary>Нужно ли устанавливать Java/IDE?</summary>
       <p>Нет. Ты можешь писать и запускать код в редакторе прямо на сайте.</p>
     </details>
 
-    <details class="faq__item">
+    <details class="faq__item reveal reveal-up reveal-delay-1">
       <summary>Где сохраняется прогресс?</summary>
-      <p>
-        Сейчас — в <code>localStorage</code> браузера. Потом можно подключить
-        аккаунты и БД.
-      </p>
+      <p>Прогресс сохраняется в аккаунте пользователя и хранится в базе данных PostgreSQL.</p>
     </details>
 
-    <details class="faq__item">
+    <details class="faq__item reveal reveal-up reveal-delay-2">
       <summary>Можно ли учиться с телефона?</summary>
-      <p>
-        Да, сайт адаптивный. На телефоне редактор проще, но уроки читаются
-        отлично.
-      </p>
+      <p>Да, сайт адаптивный. На телефоне редактор проще, но уроки читаются отлично.</p>
     </details>
 
-    <details class="faq__item">
+    <details class="faq__item reveal reveal-up reveal-delay-3">
       <summary>Если я пропущу урок?</summary>
-      <p>
-        Лучше идти по порядку. Но можно открыть любой урок и пройти выборочно.
-      </p>
+      <p>Лучше идти по порядку. Но можно открыть любой урок и пройти выборочно.</p>
     </details>
   </div>
 </section>
 
-<!-- ===== EDITORS ===== -->
 <section class="section editors">
   <div class="section__head">
     <h2 class="section__title">Популярные Java редакторы</h2>
@@ -238,73 +233,52 @@ Java Learning{% endblock %} {% block head %}
   </div>
 
   <div class="editors__grid">
-    <!-- VS CODE -->
-    <div class="editor-card">
+    <div class="editor-card reveal reveal-left tilt spotlight">
       <div class="editor-card__icon">🧩</div>
       <div class="editor-card__title">Visual Studio Code</div>
       <div class="editor-card__desc">
         Лёгкий и быстрый редактор. Поддержка Java через расширения.
       </div>
-      <a
-        class="btn btn-primary"
-        target="_blank"
-        href="https://code.visualstudio.com/Download"
-      >
+      <a class="btn btn-primary" target="_blank" href="https://code.visualstudio.com/Download">
         Скачать →
       </a>
     </div>
 
-    <!-- INTELLIJ -->
-    <div class="editor-card">
+    <div class="editor-card reveal reveal-up reveal-delay-1 tilt spotlight">
       <div class="editor-card__icon">🚀</div>
       <div class="editor-card__title">IntelliJ IDEA</div>
       <div class="editor-card__desc">
         Профессиональная IDE для Java. Очень мощная и удобная.
       </div>
-      <a
-        class="btn btn-primary"
-        target="_blank"
-        href="https://www.jetbrains.com/idea/download/"
-      >
+      <a class="btn btn-primary" target="_blank" href="https://www.jetbrains.com/idea/download/">
         Скачать →
       </a>
     </div>
 
-    <!-- ECLIPSE -->
-    <div class="editor-card">
+    <div class="editor-card reveal reveal-up reveal-delay-2 tilt spotlight">
       <div class="editor-card__icon">🌑</div>
       <div class="editor-card__title">Eclipse</div>
       <div class="editor-card__desc">
         Классическая Java IDE. Подходит для больших проектов.
       </div>
-      <a
-        class="btn btn-primary"
-        target="_blank"
-        href="https://www.eclipse.org/downloads/"
-      >
+      <a class="btn btn-primary" target="_blank" href="https://www.eclipse.org/downloads/">
         Скачать →
       </a>
     </div>
 
-    <!-- NETBEANS -->
-    <div class="editor-card">
+    <div class="editor-card reveal reveal-right reveal-delay-3 tilt spotlight">
       <div class="editor-card__icon">💻</div>
       <div class="editor-card__title">Apache NetBeans</div>
       <div class="editor-card__desc">
         Простая и удобная IDE для начинающих и студентов.
       </div>
-      <a
-        class="btn btn-primary"
-        target="_blank"
-        href="https://netbeans.apache.org/download/index.html"
-      >
+      <a class="btn btn-primary" target="_blank" href="https://netbeans.apache.org/download/index.html">
         Скачать →
       </a>
     </div>
   </div>
 </section>
 
-<!-- ===== CTA ===== -->
 <section class="section cta">
   <div class="cta__inner">
     <h2>Готов начать изучать Java?</h2>
@@ -322,25 +296,26 @@ Java Learning{% endblock %} {% block head %}
   </div>
 
   {% if latest_lessons %}
-  <div class="cards">
-    {% for lesson in latest_lessons %}
-    <a class="card" href="{% url 'lesson_detail' lesson.id %}">
-      <div class="card__title">{{ lesson.title }}</div>
-      <div class="card__desc">
-        {{ lesson.description|default:"Описание пока не
-        заполнено"|truncatechars:120 }}
-      </div>
-      <div class="card__footer">
-        <span class="pill">Открыть</span>
-        <span class="card__arrow">→</span>
-      </div>
-    </a>
-    {% endfor %}
-  </div>
+    <div class="cards">
+      {% for lesson in latest_lessons %}
+        <a class="card reveal reveal-up tilt spotlight" href="{% url 'lesson_detail' lesson.id %}">
+          <div class="card__title">{{ lesson.title }}</div>
+          <div class="card__desc">
+            {{ lesson.description|default:"Описание пока не заполнено"|truncatechars:120 }}
+          </div>
+          <div class="card__footer">
+            <span class="pill">Открыть</span>
+            <span class="card__arrow">→</span>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
   {% else %}
-  <div class="empty">Уроков пока нет. Добавь уроки через админку.</div>
+    <div class="empty">Уроков пока нет. Добавь уроки через админку.</div>
   {% endif %}
 </section>
+{% endblock %}
 
+{% block scripts %}
 <script src="{% static 'learning/js/home.js' %}"></script>
 {% endblock %}
